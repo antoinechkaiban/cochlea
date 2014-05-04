@@ -24,6 +24,7 @@ from optparse import OptionParser
 
 from fluent.model import Model
 from fluent.term import Term
+import json
 
 
 
@@ -41,6 +42,8 @@ def readFile(filename, model, resetSequences=False):
 
   s = 1
   t = 1
+
+  # with open(mapping) as map
   
   with open(filename) as f:
     previousTerm = None
@@ -55,6 +58,8 @@ def readFile(filename, model, resetSequences=False):
           previousTerm = Term().createFromString(string)
 
         term = Term().createFromString(string)
+
+
         phonemes = []
         prediction = model.feedTermAndPhonemes(previousTerm, phonemes)
         print("%10i | %10i | %20s | %20s | %20s" %
