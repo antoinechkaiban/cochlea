@@ -1,0 +1,7 @@
+
+# NuPIC
+# https://github.com/numenta/nupic.git
+
+# you need to run python -c "import nltk; nltk.download()" to download corpus for NLTK.
+nltk
+
