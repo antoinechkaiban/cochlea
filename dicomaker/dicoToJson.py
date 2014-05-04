@@ -1,7 +1,7 @@
 
 
 inputDico = open('cmudict_modif', 'r');
-outputJson = open('cmudictJson.json', 'w');
+outputJson = open('cmudict.json', 'w');
 
 consideredEntries = 0;
 irrelevantEntries = 0;
