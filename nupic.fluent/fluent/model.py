@@ -21,6 +21,7 @@
 
 import os
 import pickle
+import json
 
 import numpy
 # This is the class corresponding to the C++ optimized Temporal Pooler
@@ -40,7 +41,7 @@ class Model():
                 permanenceInc=0.1, permanenceDec=0.0,
                 activationThreshold=164,
                 pamLength=10,
-                checkpointDir=None):
+                checkpointDir="/Users/antoine_chkaiban/Documents/Github_Workspace/nupic-hackathon-2014/nupic.fluent/saved_model"):
 
     self.tp = TP(numberOfCols=numberOfCols, cellsPerColumn=cellsPerColumn,
                 initialPerm=initialPerm, connectedPerm=connectedPerm,
@@ -53,48 +54,8 @@ class Model():
                 checkSynapseConsistency=False,
                 pamLength=pamLength)
 
-    self.phonemes=[
-                  "AA",
-                  "AE",
-                  "AH",
-                  "AO",
-                  "AW",
-                  "AY",
-                  "B",
-                  "CH",
-                  "D",
-                  "DH",
-                  "EH",
-                  "ER",
-                  "EY",
-                  "F",
-                  "G",
-                  "HH",
-                  "IH",
-                  "IY",
-                  "JH",
-                  "K",
-                  "L",
-                  "M",
-                  "N",
-                  "NG",
-                  "OW",
-                  "OY",
-                  "P",
-                  "R",
-                  "S",
-                  "SH",
-                  "T",
-                  "TH",
-                  "UH",
-                  "UW",
-                  "V",
-                  "W",
-                  "Y",
-                  "Z",
-                  "ZH",
-                  "SIL"
-                ]
+    with open("/Users/antoine_chkaiban/Documents/Github_Workspace/nupic-hackathon-2014/nupic.fluent/data/phonemes.json") as phon:
+      self.phonemes = json.load(phon)
 
     self.checkpointDir = checkpointDir
     self.checkpointPklPath = None
@@ -147,8 +108,13 @@ class Model():
     """ Feed a Term to model, returning next predicted Term """
     tp = self.tp
     array = term.toArray()
+
+    print "SPARSITY: " + str(sum(array)*100/len(array))
     array += self.phonemeToBytes(phonemes_arr)
     array = numpy.array(array, dtype="uint32")
+
+
+
     tp.compute(array, enableLearn = learn, computeInfOutput = True)
 
     predictedCells = tp.getPredictedState()

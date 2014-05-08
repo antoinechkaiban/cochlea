@@ -32,50 +32,55 @@ def readFile(filename, model, resetSequences=False):
   if model.canCheckpoint() and model.hasCheckpoint():
     model.load()
 
-  exclusions = ('!', '.', ':', ',', '"', '\'', '\n')
+  exclusions = ('!', '?', '.', ':', ',', '"', '\'', '\n', '(', ')', '{', '}', '[', ']')
 
-  print("%10s | %10s | %20s | %20s | %20s" %
-        ("Sequence #", "Term #", "Current Term", "Next Term Phonemes", "Predicted Term"))
-  print("-----------------------------------"
-        "-----------------------------------"
-        "--------------------")
+  print("%10s | %10s | %20s | %20s | %30s | %20s" %
+        ("Sequence #", "Term #", "Current Term", "Next Term", "Next Term Phonemes", "Predicted Term"))
+  print("-----------------------------------------------------------------------------------------------------------------------------")
 
   s = 1
   t = 1
 
-  # with open(mapping) as map
-  
-  with open(filename) as f:
-    previousTerm = None
-    for line in f:
-      line = "".join([c for c in line if c not in exclusions])
-      strings = line.split(" ")
+  with open("/Users/antoine_chkaiban/Documents/Github_Workspace/nupic-hackathon-2014/nupic.fluent/data/cmudict.json") as cmudict:
+    mapping = json.load(cmudict)
 
-      for string in strings:
-        if not len(string):
-          continue
-        if t == 1:
-          previousTerm = Term().createFromString(string)
+    with open(filename) as f:
+      previousTerm = None
+      previousString = ""
+      for line in f:
+        line = "".join([c for c in line if c not in exclusions])
+        strings = line.split(" ")
 
-        term = Term().createFromString(string)
+        for string in strings:
+          if not len(string):
+            continue
+          if t == 1:
+            previousTerm = Term().createFromString(string)
 
+          try:
+            term = Term().createFromString(string)
+          except:
+            continue
+          if string.upper() in mapping:
+            phonemes = mapping[string.upper()][:4]
+          else:
+            phonemes = []
+          prediction = model.feedTermAndPhonemes(previousTerm, phonemes)
+          print("%10i | %10i | %20s | %20s | %30s | %20s" %
+                (s, t, previousString, string, phonemes, prediction.closestString()))
 
-        phonemes = []
-        prediction = model.feedTermAndPhonemes(previousTerm, phonemes)
-        print("%10i | %10i | %20s | %20s | %20s" %
-              (s, t, string, phonemes, prediction.closestString()))
+          previousTerm = term
+          previousString = string
+          t += 1
 
-        previousTerm = term
-        t += 1
+        if model.canCheckpoint():
+          model.save()
 
-      if model.canCheckpoint():
-        model.save()
+        if resetSequences:
+          model.resetSequence()
 
-      if resetSequences:
-        model.resetSequence()
-
-      s += 1
-      t = 1
+        s += 1
+        t = 1
 
 
 
